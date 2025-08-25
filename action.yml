@@ -252,19 +252,19 @@ runs:
       run: |
         bun run ${GITHUB_ACTION_PATH}/src/entrypoints/update-comment-link.ts
       env:
-        REPOSITORY: ${{ github.repository }}
-        PR_NUMBER: ${{ github.event.issue.number || github.event.pull_request.number }}
+        REPOSITORY: ${{ fromJson(env.CUSTOM_EVENT_PAYLOAD).repository.full_name }}
+        PR_NUMBER: ${{ fromJson(env.CUSTOM_EVENT_PAYLOAD).issue.number || fromJson(env.CUSTOM_EVENT_PAYLOAD).pull_request.number }}
         CLAUDE_COMMENT_ID: ${{ steps.prepare.outputs.claude_comment_id }}
         GITHUB_RUN_ID: ${{ github.run_id }}
         GITHUB_TOKEN: ${{ steps.prepare.outputs.GITHUB_TOKEN }}
-        GITHUB_EVENT_NAME: ${{ github.event_name }}
-        TRIGGER_COMMENT_ID: ${{ github.event.comment.id }}
+        GITHUB_EVENT_NAME: ${{ env.CUSTOM_EVENT_NAME }}
+        TRIGGER_COMMENT_ID: ${{ fromJson(env.CUSTOM_EVENT_PAYLOAD).comment.id }}
         CLAUDE_BRANCH: ${{ steps.prepare.outputs.CLAUDE_BRANCH }}
-        IS_PR: ${{ github.event.issue.pull_request != null || github.event_name == 'pull_request_review_comment' }}
+        IS_PR: ${{ fromJson(env.CUSTOM_EVENT_PAYLOAD).issue.pull_request != null || env.CUSTOM_EVENT_NAME == 'pull_request_review_comment' }}
         BASE_BRANCH: ${{ steps.prepare.outputs.BASE_BRANCH }}
         CLAUDE_SUCCESS: ${{ steps.claude-code.outputs.conclusion == 'success' }}
         OUTPUT_FILE: ${{ steps.claude-code.outputs.execution_file || '' }}
-        TRIGGER_USERNAME: ${{ github.event.comment.user.login || github.event.issue.user.login || github.event.pull_request.user.login || github.event.sender.login || github.triggering_actor || github.actor || '' }}
+        TRIGGER_USERNAME: ${{ fromJson(env.CUSTOM_EVENT_PAYLOAD).comment.user.login || fromJson(env.CUSTOM_EVENT_PAYLOAD).issue.user.login || fromJson(env.CUSTOM_EVENT_PAYLOAD).pull_request.user.login || fromJson(env.CUSTOM_EVENT_PAYLOAD).sender.login || '' }}
         PREPARE_SUCCESS: ${{ steps.prepare.outcome == 'success' }}
         PREPARE_ERROR: ${{ steps.prepare.outputs.prepare_error || '' }}
         USE_STICKY_COMMENT: ${{ inputs.use_sticky_comment }}

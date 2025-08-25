@@ -1,18 +1,18 @@
 #!/usr/bin/env bun
 
-import { createOctokit } from "../github/api/client";
 import * as fs from "fs/promises";
+import { createOctokit } from "../github/api/client";
+import { GITHUB_SERVER_URL } from "../github/api/config";
+import {
+  isEntityContext,
+  isPullRequestReviewCommentEvent,
+  parseGitHubContext,
+} from "../github/context";
+import { checkAndCommitOrDeleteBranch } from "../github/operations/branch-cleanup";
 import {
   updateCommentBody,
   type CommentUpdateInput,
 } from "../github/operations/comment-logic";
-import {
-  parseGitHubContext,
-  isPullRequestReviewCommentEvent,
-  isEntityContext,
-} from "../github/context";
-import { GITHUB_SERVER_URL } from "../github/api/config";
-import { checkAndCommitOrDeleteBranch } from "../github/operations/branch-cleanup";
 import { updateClaudeComment } from "../github/operations/comments/update-claude-comment";
 
 async function run() {
@@ -35,7 +35,7 @@ async function run() {
     const octokit = createOctokit(githubToken);
 
     const serverUrl = GITHUB_SERVER_URL;
-    const jobUrl = `${serverUrl}/${owner}/${repo}/actions/runs/${process.env.GITHUB_RUN_ID}`;
+    const jobUrl = `${serverUrl}/${context.pluginRepository.owner}/${context.pluginRepository.repo}/actions/runs/${context.runId}`;
 
     let comment;
     let isPRReviewComment = false;

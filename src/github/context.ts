@@ -1,12 +1,15 @@
 import * as github from "@actions/github";
 import type {
-  IssuesEvent,
-  IssuesAssignedEvent,
   IssueCommentEvent,
+  IssuesAssignedEvent,
+  IssuesEvent,
   PullRequestEvent,
-  PullRequestReviewEvent,
   PullRequestReviewCommentEvent,
+  PullRequestReviewEvent,
 } from "@octokit/webhooks-types";
+import { DEFAULT_MODE, isValidMode } from "../modes/registry";
+import type { ModeName } from "../modes/types";
+
 // Custom types for GitHub Actions events that aren't webhooks
 export type WorkflowDispatchEvent = {
   action?: never;
@@ -34,8 +37,6 @@ export type ScheduleEvent = {
     };
   };
 };
-import type { ModeName } from "../modes/types";
-import { DEFAULT_MODE, isValidMode } from "../modes/registry";
 
 // Event name constants for better maintainability
 const ENTITY_EVENT_NAMES = [
@@ -57,6 +58,11 @@ type BaseContext = {
   runId: string;
   eventAction?: string;
   repository: {
+    owner: string;
+    repo: string;
+    full_name: string;
+  };
+  pluginRepository: {
     owner: string;
     repo: string;
     full_name: string;
@@ -104,7 +110,17 @@ export type AutomationContext = BaseContext & {
 export type GitHubContext = ParsedGitHubContext | AutomationContext;
 
 export function parseGitHubContext(): GitHubContext {
-  const context = github.context;
+  const githubContext = github.context;
+  const eventPayload = JSON.parse(process.env.CUSTOM_EVENT_PAYLOAD || "{}");
+  const context = {
+    eventName: process.env.CUSTOM_EVENT_NAME?.replace(/\..+$/, "") || "unknown",
+    payload: eventPayload,
+    repo: {
+      owner: eventPayload.repository.full_name.split("/")[0],
+      repo: eventPayload.repository.full_name.split("/")[1],
+    },
+    actor: eventPayload.sender?.login || "unknown",
+  };
 
   const modeInput = process.env.MODE ?? DEFAULT_MODE;
   if (!isValidMode(modeInput)) {
@@ -118,6 +134,11 @@ export function parseGitHubContext(): GitHubContext {
       owner: context.repo.owner,
       repo: context.repo.repo,
       full_name: `${context.repo.owner}/${context.repo.repo}`,
+    },
+    pluginRepository: {
+      owner: githubContext.repo.owner,
+      repo: githubContext.repo.repo,
+      full_name: `${githubContext.repo.owner}/${githubContext.repo.repo}`,
     },
     actor: context.actor,
     inputs: {
