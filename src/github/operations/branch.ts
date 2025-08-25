@@ -6,12 +6,12 @@
  * - For Issues: Create a new branch
  */
 
-import { $ } from "bun";
 import * as core from "@actions/core";
-import type { ParsedGitHubContext } from "../context";
-import type { GitHubPullRequest } from "../types";
+import { $ } from "bun";
 import type { Octokits } from "../api/client";
+import type { ParsedGitHubContext } from "../context";
 import type { FetchDataResult } from "../data/fetcher";
+import type { GitHubPullRequest } from "../types";
 
 export type BranchInfo = {
   baseBranch: string;
@@ -54,7 +54,7 @@ export async function setupBranch(
       );
 
       // Execute git commands to checkout PR branch (dynamic depth based on PR size)
-      await $`git fetch origin --depth=${fetchDepth} ${branchName}`;
+      await $`git fetch origin --depth=${fetchDepth} pull/${entityNumber}/head:${branchName}`;
       await $`git checkout ${branchName} --`;
 
       console.log(`Successfully checked out PR branch for PR #${entityNumber}`);

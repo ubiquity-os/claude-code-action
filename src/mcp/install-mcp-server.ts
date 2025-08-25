@@ -84,7 +84,7 @@ export async function prepareMcpConfig(
         REPO_OWNER: owner,
         REPO_NAME: repo,
         ...(claudeCommentId && { CLAUDE_COMMENT_ID: claudeCommentId }),
-        GITHUB_EVENT_NAME: process.env.GITHUB_EVENT_NAME || "",
+        GITHUB_EVENT_NAME: context.eventName,
         GITHUB_API_URL: GITHUB_API_URL,
       },
     };
@@ -104,7 +104,7 @@ export async function prepareMcpConfig(
           BRANCH_NAME: branch,
           BASE_BRANCH: baseBranch,
           REPO_DIR: process.env.GITHUB_WORKSPACE || process.cwd(),
-          GITHUB_EVENT_NAME: process.env.GITHUB_EVENT_NAME || "",
+          GITHUB_EVENT_NAME: context.eventName,
           IS_PR: process.env.IS_PR || "false",
           GITHUB_API_URL: GITHUB_API_URL,
         },
@@ -136,7 +136,7 @@ export async function prepareMcpConfig(
     if (context.isPR && hasActionsReadPermission) {
       // Verify the token actually has actions:read permission
       const actuallyHasPermission = await checkActionsReadPermission(
-        process.env.DEFAULT_WORKFLOW_TOKEN || "",
+        githubToken,
         owner,
         repo,
       );
@@ -155,8 +155,7 @@ export async function prepareMcpConfig(
           `${process.env.GITHUB_ACTION_PATH}/src/mcp/github-actions-server.ts`,
         ],
         env: {
-          // Use workflow github token, not app token
-          GITHUB_TOKEN: process.env.DEFAULT_WORKFLOW_TOKEN,
+          GITHUB_TOKEN: githubToken,
           REPO_OWNER: owner,
           REPO_NAME: repo,
           PR_NUMBER: context.entityNumber?.toString() || "",

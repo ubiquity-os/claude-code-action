@@ -25,7 +25,7 @@ export async function updateTrackingComment(
 ) {
   const { owner, repo } = context.repository;
 
-  const jobRunLink = createJobRunLink(owner, repo, context.runId);
+  const jobRunLink = createJobRunLink(context);
 
   // Add branch link for issues (not PRs)
   let branchLink = "";

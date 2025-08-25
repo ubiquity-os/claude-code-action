@@ -22,7 +22,7 @@ export async function createInitialComment(
 ) {
   const { owner, repo } = context.repository;
 
-  const jobRunLink = createJobRunLink(owner, repo, context.runId);
+  const jobRunLink = createJobRunLink(context);
   const initialBody = createCommentBody(jobRunLink);
 
   try {
