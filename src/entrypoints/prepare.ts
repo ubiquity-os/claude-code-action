@@ -7,9 +7,8 @@
 
 import * as core from "@actions/core";
 import { createOctokit } from "../github/api/client";
-import { isEntityContext, parseGitHubContext } from "../github/context";
+import { parseGitHubContext } from "../github/context";
 import { setupGitHubToken } from "../github/token";
-import { checkWritePermissions } from "../github/validation/permissions";
 import { DEFAULT_MODE, getMode, isValidMode } from "../modes/registry";
 import type { ModeName } from "../modes/types";
 import { prepare } from "../prepare";
